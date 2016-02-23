@@ -1,6 +1,4 @@
-module Hangman
-    ( hangman
-    ) where
+module Hangman where
 
 import Control.Monad (forever)
 import Data.Char (toLower)
@@ -40,7 +38,7 @@ randomWord (WordList wl) = do
 randomWord' :: IO String
 randomWord' = gameWords >>= randomWord
 
-data Puzzle = Puzzle String [Maybe Char] [Char]
+data Puzzle = Puzzle String [Maybe Char] [Char] deriving (Eq)
 
 instance Show Puzzle where
   show (Puzzle _ discovered guessed) =
@@ -61,14 +59,14 @@ renderPuzzleChar Nothing  = ' '
 renderPuzzleChar (Just c) = c
 
 fillInCharacter :: Puzzle -> Char -> Puzzle
-fillInCharacter (Puzzle word filledInSoFar s) c =
-  Puzzle word newFilledInSoFar (c : s)
-  where zipper guessed wordChar guessChar =
+fillInCharacter (Puzzle word discoveredChars s) c =
+  Puzzle word newDiscoveredChars (c : s)
+  where zipper guessed wordChar nothing =
           if wordChar == guessed
           then Just wordChar
-          else guessChar
-        newFilledInSoFar =
-          zipWith (zipper c) word filledInSoFar
+          else nothing
+        newDiscoveredChars =
+          zipWith (zipper c) word discoveredChars
 
 handleGuess :: Puzzle -> Char -> IO Puzzle
 handleGuess puzzle guess = do
